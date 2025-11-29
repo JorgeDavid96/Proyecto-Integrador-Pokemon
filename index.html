@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="es">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>POKEMON</title>
+        <link rel="stylesheet" href="style.css" />
+    </head>
+    <body>
+        <header class="site-header">
+            <section class="logo">
+                <a href="index.html">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/International_Pok%C3%A9mon_logo.svg/640px-International_Pok%C3%A9mon_logo.svg.png" alt="logoPokemon"/>
+                </a>
+            </section>
+
+            <section class="right-controls">
+                <div class="theme-controls">
+                    <button id="theme-toggle" aria-pressed="false" aria-label="Cambiar modo claro/oscuro">
+                        <span id="theme-icon">🌙</span>
+                        <span id="theme-label">Oscuro</span>
+                    </button>
+                </div>
+            </section>
+        </header>
+
+        <main class="content">
+            <section id="pokemon-app" class="pokemon-app">
+                <header class="pokemon-controls">
+                    <label for="pokemon-name" class="sr-only">Nombre del Pokémon</label>
+                    <input id="pokemon-name" type="text" placeholder="ej. ditto" value="ditto" />
+                    <button id="fetch-pokemon">Cargar Pokémon</button>
+                    <button id="load-all">Cargar todos</button>
+
+                    <label class="inline">
+                        <input id="infinite-toggle" type="checkbox" />
+                        <span>Infinite scroll</span>
+                    </label>
+
+                <label class="inline">
+                    <span>Tamaño lote</span>
+                    <input id="batch-size-input" type="number" min="10" max="500" value="50" />
+                </label>
+                </header>
+
+                <div id="pokemon-status" class="pokemon-status" aria-live="polite"></div>
+
+                <div id="pokemon-result" class="pokemon-result">
+                <div class="poke-card empty">Pulsa "Cargar Pokémon" para ver los datos (usa "ditto" — ejemplo).</div>
+                </div>
+
+                <!-- extra controls (kept outside the results to avoid being cleared) -->
+                <div id="pokemon-controls-extra" class="pokemon-controls-extra" style="display:none;">
+                <button id="load-more" style="display:none;">Cargar más</button>
+                </div>
+
+                <!-- details modal -->
+                <div id="poke-modal" class="poke-modal" aria-hidden="true">
+                <div id="modal-backdrop" class="poke-modal-backdrop"></div>
+                <div class="poke-modal-panel" role="dialog" aria-modal="true">
+                    <button id="modal-close" class="modal-close" aria-label="Cerrar">✕</button>
+                    <div id="modal-content">Cargando…</div>
+                </div>
+                </div>
+            </section>
+        </main>
+
+        <script src="index.js"></script>
+    </body>
+</html>
