@@ -1,10 +1,10 @@
 /* Clear mode */
 :root {
-    --bg: #ffffff;
-    --surface: #ffffff;
+    --bg: #7ec2c7;
+    --surface: #178088;
     --text: #1f2937; /* neutral-800 */
-    --muted: #6b7280; /* neutral-500 */
-    --accent: #2563eb; /* blue-600 */
+    --muted: #0e1013; /* neutral-500 */
+    --accent: #178088; /* blue-600 */
     --button-bg: #111827; /* dark-ish for contrast in light mode */
     --button-text: #ffffff;
 }
@@ -25,7 +25,7 @@ html, body { height: 100%; }
 body {
     margin: 0;
     font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    background: linear-gradient(180deg, var(--bg), var(--surface));
+    background: linear-gradient(180deg, var(--bg) 0%, var(--surface) 100%);
     color: var(--text);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -76,17 +76,26 @@ body {
     background-color: var(--button-bg);
     cursor: pointer;
     font-weight: 600;
-    transition: background-color 160ms ease, color 160ms ease, transform 0.3s ease, border-color 160ms ease;
+    transition: background-color 160ms ease, color 160ms ease, transform 0.03s ease, border-color 160ms ease;
 }
 
 .theme-controls button:hover {
     transform: scale(1.08);
 }
 
-.theme-controls button[aria-pressed="true"] { transform: translateY(-1px); }
-.theme-controls button:focus { outline: 3px solid rgba(37,99,235,0.18); outline-offset: 3px; }
+.theme-controls button[aria-pressed="true"]:hover {
+    transform: scale(1.08);
+}
 
-.theme-controls #theme-icon { line-height: 1; font-size: 1.05rem; }
+.theme-controls button:focus {
+    outline: 3px solid rgba(37,99,235,0.18);
+    outline-offset: 3px;
+}
+
+.theme-controls #theme-icon {
+    line-height: 1;
+    font-size: 1.05rem;
+}
 
 /* Main content styles */
 .content {
@@ -98,15 +107,72 @@ p { color: var(--muted); max-width: 60ch; }
 code { background: rgba(0,0,0,0.06); padding: 0.125rem 0.25rem; border-radius: 4px; font-size: .95em; }
 
 /* Pokémon app styles */
-.pokemon-app { margin-top: 1.5rem; }
-.pokemon-controls { display:flex; gap:.5rem; align-items:center; margin-bottom:1rem; }
-.pokemon-controls input[type="text"]{ padding:.5rem .65rem; border-radius:8px; border:1px solid rgba(0,0,0,0.08); background:transparent; color:var(--text); min-width:160px; }
-.pokemon-controls button { padding:.5rem .75rem; border-radius:8px; border:none; background:var(--accent); color:white; cursor:pointer; font-weight:700; }
-.pokemon-controls button:hover { filter:brightness(.95); }
+.pokemon-app {
+    margin-top: 1.5rem;
+}
 
-.pokemon-result { display:flex; gap:1rem; flex-wrap:wrap; }
-.poke-card { background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01)); border-radius:12px; padding:1rem; border:1px solid rgba(0,0,0,0.06); min-width:260px; max-width:760px; box-shadow: 0 6px 18px rgba(0,0,0,0.06); color:var(--text); }
-.poke-card.empty { opacity: .8; color:var(--muted); }
+.pokemon-controls {
+    display:flex;
+    gap:1.5rem;
+    align-items: center;
+    margin-bottom:1rem;
+}
+
+.pokemon-controls input[type="text"]{
+    padding:.5rem .65rem;
+    border-radius:8px;
+    border:1px solid rgba(0,0,0,0.08);
+    background:transparent;
+    color:var(--text);
+    min-width:160px;
+    transition: transform 0.03s ease;
+}
+
+.pokemon-controls input:hover {
+    transform: scale(1.08);
+}
+
+.pokemon-controls button {
+    padding:.5rem .75rem;
+    border-radius:8px; border:none;
+    background:var(--accent);
+    color:rgb(255, 255, 255);
+    cursor:pointer;
+    font-weight:700;
+    transition: transform 0.03s ease, filter 160ms ease;
+}
+
+.pokemon-controls button:hover {
+    filter:brightness(.95);
+    transform: scale(1.08);
+}
+
+.pokemon-result {
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap:1rem;
+    padding: 1rem;;
+}
+
+.poke-card {
+    background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+    border-radius:21px;
+    padding:1rem;
+    border:1px solid rgba(0,0,0,0.06);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+    color:var(--text);
+    cursor: pointer;
+    transition: transform 0.03s ease, box-shadow 60ms ease, border-color 60ms ease;
+}
+
+.poke-card:hover {
+    transform: scale(1.05);
+}
+
+.poke-card.empty {
+    opacity: .8; color:var(--muted);
+}
+
 .poke-card.loading { opacity:.9; text-align:center; }
 .poke-card.error { color: #b91c1c; border-color: rgba(185,28,28,0.15); background:linear-gradient(180deg, rgba(185,28,28,0.02), rgba(185,28,28,0.01)); }
 
@@ -120,8 +186,8 @@ code { background: rgba(0,0,0,0.06); padding: 0.125rem 0.25rem; border-radius: 4
 .poke-stats li { background: rgba(0,0,0,0.02); padding:.35rem .5rem; border-radius:6px; font-size:.9rem; }
 
 @media (max-width:520px){
-  .poke-head { flex-direction:column; align-items:flex-start; }
-  .poke-head img { width:96px; height:96px; }
+    .poke-head { flex-direction:column; align-items:flex-start; }
+    .poke-head img { width:96px; height:96px; }
 }
 
 /* Grid layout for the full Pokedex */
@@ -138,7 +204,7 @@ code { background: rgba(0,0,0,0.06); padding: 0.125rem 0.25rem; border-radius: 4
 .pokemon-result { display:block; }
 
 @media (max-width:520px){
-  .pokemon-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+    .pokemon-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
 }
 
 /* Status area */
@@ -159,7 +225,22 @@ code { background: rgba(0,0,0,0.06); padding: 0.125rem 0.25rem; border-radius: 4
 
 /* Small improvements */
 .sr-only { position:absolute !important; height:1px; width:1px; overflow:hidden; clip:rect(1px, 1px, 1px, 1px); white-space:nowrap; }
-.inline { display:inline-flex; align-items:center; gap:.4rem; }
+
+.inline {
+    display:inline-flex;
+    align-items:center;
+    gap:.4rem;
+    cursor: pointer;
+    transition: transform 0.03s ease;
+}
+
+.inline input[type="checkbox"] {
+    cursor: pointer;
+}
+
+.inline:hover {
+    transform: scale(1.08);
+}
 
 /* Make sure text and contrast remain readable in both themes */
 @media (prefers-reduced-motion: reduce) {
