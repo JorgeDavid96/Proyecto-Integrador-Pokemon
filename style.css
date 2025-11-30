@@ -7,6 +7,19 @@
     --accent: #178088; /* blue-600 */
     --button-bg: #111827; /* dark-ish for contrast in light mode */
     --button-text: #ffffff;
+    /* card & component surfaces */
+    --card-bg: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+    --card-bg-flat: #ffffff;
+    --card-border: rgba(0,0,0,0.06);
+    /* input / form borders */
+    --input-border: rgba(0, 0, 0, 0.12);
+    --input-focus-shadow: rgba(136, 23, 61, 0.14); /* light teal accent with alpha */
+    --card-shadow: 0 6px 18px rgba(0,0,0,0.06);
+    --search-bg: #fdfdfd;
+    --code-bg: rgba(0,0,0,0.06);
+    --stat-bg: rgba(0,0,0,0.02);
+    --bg-list: #ffffff;
+    --bd-input: #000000;
 }
 /* Dark mode */
 html.dark {
@@ -17,6 +30,18 @@ html.dark {
     --accent: #60a5fa; /* lighter blue accent */
     --button-bg: #e6eef6;
     --button-text: #0b1220;
+    /* dark mode card overrides */
+    --card-bg: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.008));
+    --card-bg-flat: #0f1724;
+    --card-border: rgba(255,255,255,0.06);
+    --card-shadow: 0 10px 30px rgba(0,0,0,0.45);
+    --input-border: rgba(255,255,255,0.12);
+    --input-focus-shadow: rgba(96,165,250,0.18); /* light blue focus in dark mode */
+    --stat-bg: rgba(255, 255, 255, 0.02);
+    --search-bg: rgba(214, 18, 18, 0.02);
+    --code-bg: rgba(255,255,255,0.04);
+    --bg-list: #000000;
+    --bd-input: #dfee0e;
 }
 
 /* Small reset and base */
@@ -104,7 +129,7 @@ body {
 
 /* Paragraphs and code styling */
 p { color: var(--muted); max-width: 60ch; }
-code { background: rgba(0,0,0,0.06); padding: 0.125rem 0.25rem; border-radius: 4px; font-size: .95em; }
+code { background: var(--code-bg); padding: 0.125rem 0.25rem; border-radius: 4px; font-size: .95em; color: var(--text); }
 
 /* Pokémon app styles */
 .pokemon-app {
@@ -121,15 +146,33 @@ code { background: rgba(0,0,0,0.06); padding: 0.125rem 0.25rem; border-radius: 4
 .pokemon-controls input[type="text"]{
     padding:.5rem .65rem;
     border-radius:8px;
-    border:1px solid rgba(0,0,0,0.08);
+    border:5px solid var(--input-border);
     background:transparent;
     color:var(--text);
     min-width:160px;
     transition: transform 0.03s ease;
 }
 
+.pokemon-controls select {
+    padding:.4rem .6rem;
+    border-radius:8px;
+    border:1px solid var(--input-border);
+    background:transparent;
+    color:var(--text);
+    min-width:80px;
+}
+
 .pokemon-controls input:hover {
     transform: scale(1.08);
+}
+
+.pokemon-controls input[type="text"]:focus,
+.pokemon-controls select:focus,
+.searchPokemon input:focus,
+.searchPokemon select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 6px var(--input-focus-shadow);
 }
 
 .pokemon-controls button {
@@ -147,26 +190,48 @@ code { background: rgba(0,0,0,0.06); padding: 0.125rem 0.25rem; border-radius: 4
     transform: scale(1.08);
 }
 
+.searchPokemon {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin: 20px;
+    padding: 15px;
+    border-radius: 15px;
+    background-color: var(--search-bg);
+    transition: transform 0.03s ease, box-shadow 60ms ease;
+}
+
+.searchPokemon input[type="text"] {
+    border: var(--bd-input) 2px solid;
+}
+
+.searchPokemon:hover {
+    transform: scale(1.03);
+    box-shadow: var(--card-shadow);
+}
+
 .pokemon-result {
     display:grid;
     grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
     gap:1rem;
-    padding: 1rem;;
+    padding: 1rem;
 }
 
 .poke-card {
-    background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+    background: var(--card-bg);
+    background-color: var(--card-bg-flat);
     border-radius:21px;
     padding:1rem;
-    border:1px solid rgba(0,0,0,0.06);
-    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+    margin-bottom: 1rem;
+    border:1px solid var(--card-border);
+    box-shadow: var(--card-shadow);
     color:var(--text);
     cursor: pointer;
     transition: transform 0.03s ease, box-shadow 60ms ease, border-color 60ms ease;
 }
 
 .poke-card:hover {
-    transform: scale(1.05);
+    transform: scale(1.03);
 }
 
 .poke-card.empty {
@@ -183,7 +248,7 @@ code { background: rgba(0,0,0,0.06); padding: 0.125rem 0.25rem; border-radius: 4
 
 .poke-stats h3 { margin:.75rem 0 .5rem 0; }
 .poke-stats ul { list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(auto-fit, minmax(120px, 1fr)); gap:.5rem; }
-.poke-stats li { background: rgba(0,0,0,0.02); padding:.35rem .5rem; border-radius:6px; font-size:.9rem; }
+.poke-stats li { background: var(--stat-bg); padding:.35rem .5rem; border-radius:6px; font-size:.9rem; }
 
 @media (max-width:520px){
     .poke-head { flex-direction:column; align-items:flex-start; }
@@ -210,11 +275,24 @@ code { background: rgba(0,0,0,0.06); padding: 0.125rem 0.25rem; border-radius: 4
 /* Status area */
 .pokemon-status { margin-top:.5rem; color:var(--muted); font-size:.95rem; min-height:1.2em; }
 
+/* Pager (page number buttons) */
+.pager { display:flex; gap:.35rem; justify-content:center; align-items:center; margin-top:8px; }
+.pager .page-btn { padding: .35rem .6rem; border-radius:6px; background: transparent; border:1px solid rgba(0,0,0,0.08); color:var(--text); cursor:pointer; font-weight:700; min-width:36px; }
+.pager .page-btn:hover { transform: translateY(-2px); filter:brightness(.98); }
+.pager .page-btn.active { background:var(--accent); color:#fff; box-shadow: 0 6px 18px rgba(0,0,0,0.08); border-color: transparent; }
+.pager .page-dots { padding: .35rem .6rem; color:var(--muted); font-weight:700; }
+
+/* Make pager compact on mobile */
+@media (max-width:520px) {
+    .pager { gap:.25rem; }
+    .pager .page-btn { padding:.3rem .45rem; min-width:30px; font-size:.92rem; }
+}
+
 /* Modal */
 .poke-modal { display:none; position:fixed; inset:0; z-index:50; align-items:center; justify-content:center; }
 .poke-modal.open { display:flex; }
 .poke-modal-backdrop { position:absolute; inset:0; background:rgba(2,6,23,0.6); }
-.poke-modal-panel { position:relative; z-index:60; width:min(760px, 94%); max-height:86vh; overflow:auto; background:var(--surface); border-radius:10px; padding:1rem; border:1px solid rgba(0,0,0,0.06); box-shadow: 0 10px 40px rgba(0,0,0,0.25); }
+.poke-modal-panel { position:relative; z-index:60; width:min(760px, 94%); max-height:86vh; overflow:auto; background:var(--surface); border-radius:10px; padding:1rem; border:1px solid var(--card-border); box-shadow: var(--card-shadow); }
 .modal-close { position:absolute; right:.5rem; top:.35rem; border:none; background:transparent; font-size:1.05rem; cursor:pointer; }
 
 .detail-card { display:flex; flex-direction:column; gap:.6rem; }
@@ -232,6 +310,10 @@ code { background: rgba(0,0,0,0.06); padding: 0.125rem 0.25rem; border-radius: 4
     gap:.4rem;
     cursor: pointer;
     transition: transform 0.03s ease;
+}
+
+.inline option {
+    background-color: var(--bg-list);
 }
 
 .inline input[type="checkbox"] {

@@ -27,20 +27,28 @@
         <main class="content">
             <section id="pokemon-app" class="pokemon-app">
                 <header class="pokemon-controls">
-                    <label for="pokemon-name" class="sr-only">Nombre del Pokémon</label>
-                    <input id="pokemon-name" type="text" placeholder="Nombre del pokemon" value=""/>
-                    <button id="fetch-pokemon">Cargar Pokémon</button>
-                    <button id="load-all">Cargar todos</button>
+                    <form id="search-form" class="searchPokemon">
+                        <label for="pokemon-name" class="sr-only">Nombre del Pokémon</label>
+                        <input id="pokemon-name" type="text" placeholder="Nombre del pokemon" value=""/>
+                        <button id="fetch-pokemon" type="submit">Cargar Pokémon</button>
+                        <button id="load-all" type="button">Cargar todos</button>
 
-                    <label class="inline">
-                        <input id="infinite-toggle" type="checkbox" />
-                        <span>Mostrar todos</span>
-                    </label>
+                        <label class="inline">
+                            <input id="infinite-toggle" type="checkbox" />
+                            <span>Mostrar todos</span>
+                        </label>
 
-                    <label class="inline">
-                        <span>Cantidad visible</span>
-                        <input id="batch-size-input" type="number" min="10" max="500" value="50" />
-                    </label>
+                        <label class="inline">
+                            <span>Cantidad visible</span>
+                            <select name="cantidadVisible" id="cantidadVisible">
+                                <option value="10">10</option>
+                                <option value="20">20</option>
+                                <option value="30">30</option>
+                                <option value="40">40</option>
+                                <option value="50">50</option>
+                            </select>
+                        </label>
+                    </form>
                 </header>
 
                 <div id="pokemon-status" class="pokemon-status" aria-live="polite"></div>
@@ -51,8 +59,13 @@
 
                 <!-- extra controls (kept outside the results to avoid being cleared) -->
                 <div id="pokemon-controls-extra" class="pokemon-controls-extra" style="display:none;">
-                <button id="load-more" style="display:none;">Cargar más</button>
+                    <button id="first-page" style="display:none;">Inicio</button>
+                    <button id="load-prev" style="display:none;">Anterior</button>
+                    <button id="load-more" style="display:none;">Siguiente</button>
                 </div>
+
+                <!-- pager (page numbers) -->
+                <nav id="pager" class="pager" style="display:none; margin-top:.75rem; text-align:center;"></nav>
 
                 <!-- details modal -->
                 <div id="poke-modal" class="poke-modal" aria-hidden="true">

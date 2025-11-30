@@ -38,18 +38,25 @@ const fetchBtn = document.getElementById('fetch-pokemon');
 const nameInput = document.getElementById('pokemon-name');
 const resultEl = document.getElementById('pokemon-result');
 const statusEl = document.getElementById('pokemon-status');
+const searchForm = document.getElementById('search-form');
 
 const loadAllBtn = document.getElementById('load-all');
 const loadMoreBtn = document.getElementById('load-more');
+const prevBtn = document.getElementById('load-prev');
+const firstBtn = document.getElementById('first-page');
 const extraControls = document.getElementById('pokemon-controls-extra');
 const infiniteToggle = document.getElementById('infinite-toggle');
-const batchSizeInput = document.getElementById('batch-size-input');
+// support two possible element ids: older 'batch-size-input' or newer 'cantidadVisible'
+let batchSizeInput = document.getElementById('batch-size-input');
+if (!batchSizeInput) batchSizeInput = document.getElementById('cantidadVisible');
 
 // app state
 let allPokemon = [];
 let currentIndex = 0;
 let batchSize = parseInt(batchSizeInput?.value || '50', 10) || 50;
 let infiniteObserver = null;
+let totalPages = 0;
+let paginationMode = 'append';
 
 function setStatus(text) {
   statusEl.textContent = text || '';
@@ -150,7 +157,130 @@ function updateProgressText() {
     setStatus('');
     return;
   }
-  setStatus(`Mostrando ${Math.min(currentIndex, allPokemon.length)} de ${allPokemon.length}`);
+  if (paginationMode === 'replace') {
+    const start = pageIndex * batchSize + 1;
+    const end = Math.min((pageIndex + 1) * batchSize, allPokemon.length);
+    setStatus(`Mostrando ${start}-${end} de ${allPokemon.length}`);
+  } else {
+    setStatus(`Mostrando ${Math.min(currentIndex, allPokemon.length)} de ${allPokemon.length}`);
+  }
+}
+
+// render specific page for replace-mode pagination
+function renderPage(index) {
+  if (!allPokemon.length) return;
+  batchSize = parseInt(batchSizeInput?.value || String(batchSize), 10) || batchSize;
+  totalPages = Math.ceil(allPokemon.length / batchSize);
+  if (index < 0) index = 0;
+  if (index >= totalPages) index = totalPages - 1;
+  const start = index * batchSize;
+  const end = Math.min(start + batchSize, allPokemon.length);
+  const slice = allPokemon.slice(start, end);
+  renderPokemonsGrid(slice, false);
+  pageIndex = index;
+  currentIndex = end;
+  updateProgressText();
+
+  // update pager UI (if present)
+  const pager = document.getElementById('pager');
+  if (pager) {
+      // rebuild pager so the sliding window updates correctly based on the new pageIndex
+      renderPager();
+    pager.style.display = totalPages > 1 ? 'flex' : 'none';
+  }
+
+  // update controls visibility
+  firstBtn && (firstBtn.style.display = pageIndex > 0 ? 'inline-block' : 'none');
+  prevBtn && (prevBtn.style.display = pageIndex > 0 ? 'inline-block' : 'none');
+  const remaining = Math.max(0, allPokemon.length - currentIndex);
+  const nextCount = Math.min(batchSize, remaining);
+  if (nextCount > 0) {
+    loadMoreBtn.style.display = 'inline-block';
+    loadMoreBtn.textContent = `Siguiente (${nextCount})`;
+  } else {
+    loadMoreBtn.style.display = 'none';
+  }
+}
+
+function renderPager() {
+  const pager = document.getElementById('pager');
+  if (!pager) return;
+  pager.innerHTML = '';
+  totalPages = Math.ceil(allPokemon.length / batchSize) || 1;
+  // show a sliding window of page buttons (max 5 visible) and ellipses
+  const maxButtons = 5;
+  if (totalPages <= maxButtons) {
+    for (let i = 0; i < totalPages; i++) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'page-btn';
+      btn.textContent = (i + 1).toString();
+      btn.disabled = i === pageIndex;
+      btn.setAttribute('aria-label', `Página ${i + 1}`);
+      btn.setAttribute('data-page', String(i));
+      btn.setAttribute('data-page', String(i));
+      if (i === pageIndex) btn.classList.add('active');
+      btn.addEventListener('click', () => renderPage(i));
+      pager.appendChild(btn);
+    }
+  } else {
+    const half = Math.floor(maxButtons / 2); // 2
+    let start = pageIndex - half;
+    let end = pageIndex + half;
+    if (start < 0) { start = 0; end = maxButtons - 1; }
+    if (end > totalPages - 1) { end = totalPages - 1; start = totalPages - maxButtons; }
+
+    // optional first page + ellipsis
+    if (start > 0) {
+      const first = document.createElement('button');
+      first.type = 'button';
+      first.className = 'page-btn';
+      first.textContent = '1';
+      first.setAttribute('data-page', '0');
+      first.setAttribute('aria-label', 'Página 1');
+      first.addEventListener('click', () => renderPage(0));
+      pager.appendChild(first);
+      if (start > 1) {
+        const dots = document.createElement('span');
+        dots.className = 'page-dots';
+        dots.textContent = '…';
+        pager.appendChild(dots);
+      }
+    }
+
+    for (let i = start; i <= end; i++) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'page-btn';
+      btn.textContent = (i + 1).toString();
+      btn.disabled = i === pageIndex;
+      btn.setAttribute('aria-label', `Página ${i + 1}`);
+      btn.setAttribute('data-page', String(i));
+      btn.setAttribute('data-page', String(i));
+      if (i === pageIndex) btn.classList.add('active');
+      btn.addEventListener('click', () => renderPage(i));
+      pager.appendChild(btn);
+    }
+
+    // optional trailing ellipsis + last page
+    if (end < totalPages - 1) {
+      if (end < totalPages - 2) {
+        const dots = document.createElement('span');
+        dots.className = 'page-dots';
+        dots.textContent = '…';
+        pager.appendChild(dots);
+      }
+      const last = document.createElement('button');
+      last.type = 'button';
+      last.className = 'page-btn';
+      last.textContent = totalPages.toString();
+      last.setAttribute('data-page', String(totalPages - 1));
+      last.setAttribute('aria-label', `Página ${totalPages}`);
+      last.addEventListener('click', () => renderPage(totalPages - 1));
+      pager.appendChild(last);
+    }
+  }
+  pager.style.display = totalPages > 1 ? 'flex' : 'none';
 }
 
 function renderNextBatch() {
@@ -191,16 +321,25 @@ async function fetchAllPokemons() {
       return;
     }
 
-    // render first batch and expose controls
-    resultEl.innerHTML = '';
-    currentIndex = 0;
-    renderNextBatch();
+    // Setup replace-mode pagination (pages) using the selected batchSize
+    paginationMode = 'replace';
+    // make sure batchSize reflects select value
+    batchSize = parseInt(batchSizeInput?.value || String(batchSize), 10) || batchSize;
+    totalPages = Math.ceil(allPokemon.length / batchSize);
 
-    // show controls
+    // render first page (index 0)
+    pageIndex = 0;
+    renderPage(0);
+    renderPager();
+
+    // show pager & controls
     extraControls.style.display = 'block';
+    const remaining = Math.max(0, allPokemon.length - currentIndex);
+    const nextCount = Math.min(batchSize, remaining);
+    loadMoreBtn.style.display = nextCount > 0 ? 'inline-block' : 'none';
 
-    // if infinite enabled, attach scroll handler
-    if (infiniteToggle && infiniteToggle.checked) attachInfiniteScroll();
+    // disable infinite-scroll in page mode
+    detachInfiniteScroll();
   } catch (err) {
     showError('Error cargando la lista — ' + (err.message || err));
   }
@@ -209,10 +348,13 @@ async function fetchAllPokemons() {
 function resetAllState() {
   allPokemon = [];
   currentIndex = 0;
+  pageIndex = 0;
   loadMoreBtn.style.display = 'none';
   extraControls.style.display = 'none';
   resultEl.innerHTML = '';
   setStatus('');
+  totalPages = 0;
+  paginationMode = 'append';
   detachInfiniteScroll();
 }
 
@@ -287,7 +429,20 @@ modalClose.addEventListener('click', closeModal);
 modalBackdrop.addEventListener('click', closeModal);
 
 // Wire up UI
-fetchBtn.addEventListener('click', () => {
+// form submit handler (prevents page reload and performs the search)
+if (searchForm) {
+  searchForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    detachInfiniteScroll();
+    fetchPokemon(nameInput.value || 'ditto');
+  });
+}
+
+// keep the button click handler for direct clicks (defensive)
+fetchBtn.addEventListener('click', (e) => {
+  // if button was clicked and sits inside a form this might trigger submit
+  // our submit handler will run; we still prevent default and call fetch.
+  e.preventDefault();
   detachInfiniteScroll();
   fetchPokemon(nameInput.value || 'ditto');
 });
@@ -297,7 +452,19 @@ loadAllBtn.addEventListener('click', () => {
   fetchAllPokemons();
 });
 
-loadMoreBtn.addEventListener('click', () => renderNextBatch());
+loadMoreBtn.addEventListener('click', () => {
+  if (paginationMode === 'replace') {
+    // in page mode, clicking "Siguiente" should go to next page
+    renderPage(pageIndex + 1);
+  } else {
+    // in append/legacy mode, keep loading next batch
+    renderNextBatch();
+  }
+});
+
+// previous / first page navigation (replace mode)
+if (prevBtn) prevBtn.addEventListener('click', () => renderPage(pageIndex - 1));
+if (firstBtn) firstBtn.addEventListener('click', () => renderPage(0));
 
 // When user toggles infinite scroll, attach/detach appropriately
 if (infiniteToggle) {
