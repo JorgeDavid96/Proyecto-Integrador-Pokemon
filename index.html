@@ -30,7 +30,7 @@
                     <form id="search-form" class="searchPokemon">
                         <label for="pokemon-name" class="sr-only">Nombre del Pokémon</label>
                         <input id="pokemon-name" type="text" placeholder="Nombre del pokemon" value=""/>
-                        <button id="fetch-pokemon" type="submit">Cargar Pokémon</button>
+                        <button id="fetch-pokemon" type="submit">Buscar Pokémon</button>
                         <button id="load-all" type="button">Cargar todos</button>
 
                         <label class="inline">
@@ -41,11 +41,11 @@
                         <label class="inline">
                             <span>Cantidad visible</span>
                             <select name="cantidadVisible" id="cantidadVisible">
-                                <option value="10">10</option>
-                                <option value="20">20</option>
-                                <option value="30">30</option>
-                                <option value="40">40</option>
                                 <option value="50">50</option>
+                                <option value="40">40</option>
+                                <option value="30">30</option>
+                                <option value="20">20</option>
+                                <option value="10">10</option>
                             </select>
                         </label>
                     </form>
@@ -54,18 +54,19 @@
                 <div id="pokemon-status" class="pokemon-status" aria-live="polite"></div>
 
                 <div id="pokemon-result" class="pokemon-result">
-                <div class="poke-card empty">Pulsa "Cargar Pokémon" para ver los datos (usa "ditto" — ejemplo).</div>
-                </div>
-
-                <!-- extra controls (kept outside the results to avoid being cleared) -->
-                <div id="pokemon-controls-extra" class="pokemon-controls-extra" style="display:none;">
-                    <button id="first-page" style="display:none;">Inicio</button>
-                    <button id="load-prev" style="display:none;">Anterior</button>
-                    <button id="load-more" style="display:none;">Siguiente</button>
+                    <!-- single search result will appear here (keeps grid below) -->
+                    <div id="pokemon-single" class="pokemon-single">
+                        <div class="poke-card empty">Pulsa "Cargar Pokémon" para ver los datos (usa "ditto" — ejemplo).</div>
+                    </div>
+                    <!-- grid / list area (rendered by JS into .pokemon-grid inside this container) -->
                 </div>
 
                 <!-- pager (page numbers) -->
-                <nav id="pager" class="pager" style="display:none; margin-top:.75rem; text-align:center;"></nav>
+                <nav id="pager" class="pager" style="display:none; margin-top:.75rem; text-align:center;">
+                    <div id="pokemon-controls-extra" class="pokemon-controls-extra" style="display:none;">
+                        <button id="load-more" style="display:none;"></button>
+                    </div>
+                </nav>
 
                 <!-- details modal -->
                 <div id="poke-modal" class="poke-modal" aria-hidden="true">

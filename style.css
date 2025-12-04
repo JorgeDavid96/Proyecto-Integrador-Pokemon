@@ -20,6 +20,7 @@
     --stat-bg: rgba(0,0,0,0.02);
     --bg-list: #ffffff;
     --bd-input: #000000;
+    --bg-numPage: white;
 }
 /* Dark mode */
 html.dark {
@@ -42,6 +43,7 @@ html.dark {
     --code-bg: rgba(255,255,255,0.04);
     --bg-list: #000000;
     --bd-input: #dfee0e;
+    --bg-numPage: transparent;
 }
 
 /* Small reset and base */
@@ -163,7 +165,7 @@ code { background: var(--code-bg); padding: 0.125rem 0.25rem; border-radius: 4px
 }
 
 .pokemon-controls input:hover {
-    transform: scale(1.08);
+    transform: scale(1.02);
 }
 
 .pokemon-controls input[type="text"]:focus,
@@ -203,6 +205,7 @@ code { background: var(--code-bg); padding: 0.125rem 0.25rem; border-radius: 4px
 
 .searchPokemon input[type="text"] {
     border: var(--bd-input) 2px solid;
+    width: 60%;
 }
 
 .searchPokemon:hover {
@@ -238,6 +241,10 @@ code { background: var(--code-bg); padding: 0.125rem 0.25rem; border-radius: 4px
     opacity: .8; color:var(--muted);
 }
 
+/* Single-result area above grid (search card) */
+.pokemon-single { margin-bottom: .75rem; }
+.pokemon-single .poke-card { margin: 0; }
+
 .poke-card.loading { opacity:.9; text-align:center; }
 .poke-card.error { color: #b91c1c; border-color: rgba(185,28,28,0.15); background:linear-gradient(180deg, rgba(185,28,28,0.02), rgba(185,28,28,0.01)); }
 
@@ -250,10 +257,7 @@ code { background: var(--code-bg); padding: 0.125rem 0.25rem; border-radius: 4px
 .poke-stats ul { list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(auto-fit, minmax(120px, 1fr)); gap:.5rem; }
 .poke-stats li { background: var(--stat-bg); padding:.35rem .5rem; border-radius:6px; font-size:.9rem; }
 
-@media (max-width:520px){
-    .poke-head { flex-direction:column; align-items:flex-start; }
-    .poke-head img { width:96px; height:96px; }
-}
+/* small-card adjustments kept in place; detailed responsive rules handled below */
 
 /* Grid layout for the full Pokedex */
 .pokemon-grid { display:grid; gap:.6rem; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); width:100%; }
@@ -264,36 +268,67 @@ code { background: var(--code-bg); padding: 0.125rem 0.25rem; border-radius: 4px
 .grid-name { font-weight:700; text-transform:capitalize; }
 
 .pokemon-controls-extra { display:flex; justify-content:center; align-items:center; gap:.5rem; }
-.pokemon-controls-extra button { padding:.45rem .8rem; border-radius:8px; background:var(--accent); color:#fff; border:none; font-weight:700; cursor:pointer; }
+.pokemon-controls-extra button { display:inline-flex; align-items:center; justify-content:center; padding:.45rem .8rem; border-radius:8px; background:var(--accent); color:#fff; border:none; font-weight:700; cursor:pointer; }
 
 .pokemon-result { display:block; }
 
-@media (max-width:520px){
-    .pokemon-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
-}
+/* grid column sizing for very small screens is handled in the mobile breakpoint below */
 
 /* Status area */
 .pokemon-status { margin-top:.5rem; color:var(--muted); font-size:.95rem; min-height:1.2em; }
 
 /* Pager (page number buttons) */
 .pager { display:flex; gap:.35rem; justify-content:center; align-items:center; margin-top:8px; }
-.pager .page-btn { padding: .35rem .6rem; border-radius:6px; background: transparent; border:1px solid rgba(0,0,0,0.08); color:var(--text); cursor:pointer; font-weight:700; min-width:36px; }
+
+.pager .page-btn {
+    padding: .35rem .6rem;
+    border-radius:6px;
+    background: var(--bg-numPage);
+    border:1px solid rgba(0,0,0,0.08);
+    color:var(--text);
+    cursor:pointer;
+    font-weight:700;
+    min-width:36px;
+}
+
 .pager .page-btn:hover { transform: translateY(-2px); filter:brightness(.98); }
 .pager .page-btn.active { background:var(--accent); color:#fff; box-shadow: 0 6px 18px rgba(0,0,0,0.08); border-color: transparent; }
 .pager .page-dots { padding: .35rem .6rem; color:var(--muted); font-weight:700; }
 
+.pager .page-arrow { padding: .35rem .6rem; border-radius:6px; background: var(--bg-numPage); border:1px solid rgba(0,0,0,0.08); color:var(--text); cursor:pointer; font-weight:900; min-width:36px; font-size:1.15rem; }
+.pager .page-arrow[disabled] { opacity: .45; cursor: default; }
+
 /* Make pager compact on mobile */
-@media (max-width:520px) {
-    .pager { gap:.25rem; }
-    .pager .page-btn { padding:.3rem .45rem; min-width:30px; font-size:.92rem; }
-}
+/* pager compactness for very small screens handled in mobile breakpoint below */
 
 /* Modal */
 .poke-modal { display:none; position:fixed; inset:0; z-index:50; align-items:center; justify-content:center; }
 .poke-modal.open { display:flex; }
 .poke-modal-backdrop { position:absolute; inset:0; background:rgba(2,6,23,0.6); }
-.poke-modal-panel { position:relative; z-index:60; width:min(760px, 94%); max-height:86vh; overflow:auto; background:var(--surface); border-radius:10px; padding:1rem; border:1px solid var(--card-border); box-shadow: var(--card-shadow); }
-.modal-close { position:absolute; right:.5rem; top:.35rem; border:none; background:transparent; font-size:1.05rem; cursor:pointer; }
+
+.poke-modal-panel {
+    position:relative;
+    z-index:60;
+    width:min(760px, 94%);
+    max-height:86vh;
+    overflow:auto;
+    background:var(--surface);
+    border-radius:10px;
+    padding:1rem;
+    border:1px solid var(--card-border);
+    box-shadow: var(--card-shadow);
+}
+
+.modal-close {
+    position:absolute;
+    right:.5rem;
+    top:.35rem;
+    border:none;
+    background:transparent;
+    font-size:1.05rem;
+    cursor:pointer;
+    color:var(--muted);
+}
 
 .detail-card { display:flex; flex-direction:column; gap:.6rem; }
 .detail-head { display:flex; gap:1rem; align-items:center; }
@@ -325,6 +360,53 @@ code { background: var(--code-bg); padding: 0.125rem 0.25rem; border-radius: 4px
 }
 
 /* Make sure text and contrast remain readable in both themes */
+/* Responsive: mobile and tablet breakpoints (requested ranges)
+    mobile: 320px - 640px
+    tablet: 641px - 1024px */
+
+@media (min-width:320px) and (max-width:640px) {
+    /* header */
+    .site-header { padding: .7rem .8rem; }
+    .site-header .logo img { height: 120px; }
+
+    /* page padding */
+    .content { padding: .6rem .8rem; }
+
+    /* Search area stacks vertically on small screens */
+    .searchPokemon { flex-direction: column; align-items: stretch; gap: .6rem; padding: 10px; margin: 10px; }
+    .searchPokemon input[type="text"], .searchPokemon select, .searchPokemon button { width: 100%; min-width: 0; }
+    .searchPokemon .inline { display:flex; justify-content: space-between; gap: .5rem; width:100%; }
+
+    /* Grid & cards */
+    .pokemon-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: .6rem; }
+    .poke-card { padding: .75rem; border-radius:12px; }
+    .poke-card.grid-item { min-height: 130px; max-width: 100%; }
+
+    /* Pager compact */
+    .pager { gap: .25rem; }
+    .pager .page-btn, .pager .page-arrow { min-width: 30px; padding: .28rem .45rem; }
+}
+
+@media (min-width:641px) and (max-width:1024px) {
+    /* header */
+    .site-header .logo img { height: 150px; }
+    .content { padding: 1rem 1.25rem; }
+
+    /* Search uses wrapping; input expands */
+    .searchPokemon { flex-wrap: wrap; align-items: center; gap: .6rem; padding: 12px; margin: 14px; }
+    .searchPokemon input[type="text"] { flex: 1 1 60%; min-width: 200px; }
+    .searchPokemon select { flex: 0 0 auto; min-width: 90px; }
+    .searchPokemon button { flex: 0 0 auto; }
+    .searchPokemon .inline { display:inline-flex; align-items:center; gap:.5rem; }
+
+    /* Grid */
+    .pokemon-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+    .poke-card.grid-item { min-height: 140px; max-width: 210px; }
+
+    /* Pager spacing */
+    .pager .page-btn, .pager .page-arrow { padding: .4rem .65rem; min-width: 38px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; }
 }

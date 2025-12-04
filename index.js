@@ -53,6 +53,7 @@ if (!batchSizeInput) batchSizeInput = document.getElementById('cantidadVisible')
 // app state
 let allPokemon = [];
 let currentIndex = 0;
+let pageIndex = 0;
 let batchSize = parseInt(batchSizeInput?.value || '50', 10) || 50;
 let infiniteObserver = null;
 let totalPages = 0;
@@ -64,13 +65,39 @@ function setStatus(text) {
 
 function setLoading(isLoading) {
   setStatus(isLoading ? 'Cargando…' : '');
-  if (isLoading && resultEl.children.length === 0) {
-    resultEl.innerHTML = '<div class="poke-card loading">Cargando…</div>';
+  const ensureSingle = () => {
+    let single = document.getElementById('pokemon-single');
+    if (!single) {
+      single = document.createElement('div');
+      single.id = 'pokemon-single';
+      single.className = 'pokemon-single';
+      // insert at the top of results so grid remains below
+      resultEl.insertBefore(single, resultEl.firstChild);
+    }
+    return single;
+  };
+
+  if (isLoading) {
+    const singleEl = ensureSingle();
+    singleEl.innerHTML = '<div class="poke-card loading">Cargando…</div>';
+    singleEl.style.display = 'block';
   }
 }
 
 function showError(msg) {
-  resultEl.innerHTML = `<div class="poke-card error">${msg}</div>`;
+  const ensureSingle = () => {
+    let single = document.getElementById('pokemon-single');
+    if (!single) {
+      single = document.createElement('div');
+      single.id = 'pokemon-single';
+      single.className = 'pokemon-single';
+      resultEl.insertBefore(single, resultEl.firstChild);
+    }
+    return single;
+  };
+  const singleEl = ensureSingle();
+  singleEl.innerHTML = `<div class="poke-card error">${msg}</div>`;
+  singleEl.style.display = 'block';
   setStatus('');
 }
 
@@ -83,7 +110,18 @@ function renderPokemon(data) {
   const abilities = data.abilities.map(a => a.ability.name).join(', ');
   const statsRows = data.stats.map(s => `<li><strong>${s.stat.name}</strong>: ${s.base_stat}</li>`).join('');
 
-  resultEl.innerHTML = `
+  const ensureSingle = () => {
+    let single = document.getElementById('pokemon-single');
+    if (!single) {
+      single = document.createElement('div');
+      single.id = 'pokemon-single';
+      single.className = 'pokemon-single';
+      resultEl.insertBefore(single, resultEl.firstChild);
+    }
+    return single;
+  };
+  const singleEl = ensureSingle();
+  const cardHtml = `
     <article class="poke-card">
       <header class="poke-head">
         <img src="${img}" alt="Imagen de ${data.name}" onerror="this.style.display='none'" />
@@ -99,6 +137,12 @@ function renderPokemon(data) {
       </section>
     </article>
   `;
+  if (singleEl) {
+    singleEl.innerHTML = cardHtml;
+    singleEl.style.display = 'block';
+  } else {
+    resultEl.innerHTML = cardHtml;
+  }
   setStatus('');
 }
 
@@ -124,13 +168,16 @@ function getImageUrlForId(id){
 
 // GRID rendering for many pokemons
 function renderPokemonsGrid(items, append = false) {
-  if (!append) resultEl.innerHTML = '';
-
+  // Only clear the grid area (don't wipe the whole container; keep the single-result card)
   let grid = resultEl.querySelector('.pokemon-grid');
   if (!grid) {
     grid = document.createElement('div');
     grid.className = 'pokemon-grid';
     resultEl.appendChild(grid);
+  }
+  if (!append) {
+    // clear only the grid's children, keep other nodes (like #pokemon-single) intact
+    grid.innerHTML = '';
   }
 
   items.forEach(p => {
@@ -187,6 +234,8 @@ function renderPage(index) {
       // rebuild pager so the sliding window updates correctly based on the new pageIndex
       renderPager();
     pager.style.display = totalPages > 1 ? 'flex' : 'none';
+    // ensure the previous/first/siguiente controls are visible when multiple pages exist
+    if (extraControls) extraControls.style.display = totalPages > 1 ? 'flex' : 'none';
   }
 
   // update controls visibility
@@ -208,6 +257,25 @@ function renderPager() {
   pager.innerHTML = '';
   totalPages = Math.ceil(allPokemon.length / batchSize) || 1;
   // show a sliding window of page buttons (max 5 visible) and ellipses
+  // we also add small left/right arrows inside the pager so users can always go prev/next
+  // regardless of the external control buttons visibility
+  const createArrow = (dir) => {
+    const arrow = document.createElement('button');
+    arrow.type = 'button';
+    arrow.className = 'page-arrow';
+    arrow.setAttribute('aria-label', dir === 'left' ? 'Anterior' : 'Siguiente');
+    arrow.textContent = dir === 'left' ? '‹' : '›';
+    arrow.addEventListener('click', () => {
+      if (dir === 'left') renderPage(pageIndex - 1);
+      else renderPage(pageIndex + 1);
+    });
+    return arrow;
+  };
+
+  // left arrow
+  const leftArrow = createArrow('left');
+  leftArrow.disabled = pageIndex <= 0;
+  pager.appendChild(leftArrow);
   const maxButtons = 5;
   if (totalPages <= maxButtons) {
     for (let i = 0; i < totalPages; i++) {
@@ -218,11 +286,14 @@ function renderPager() {
       btn.disabled = i === pageIndex;
       btn.setAttribute('aria-label', `Página ${i + 1}`);
       btn.setAttribute('data-page', String(i));
-      btn.setAttribute('data-page', String(i));
       if (i === pageIndex) btn.classList.add('active');
       btn.addEventListener('click', () => renderPage(i));
       pager.appendChild(btn);
     }
+    // add right arrow at end
+    const rightArrow = createArrow('right');
+    rightArrow.disabled = pageIndex >= totalPages - 1;
+    pager.appendChild(rightArrow);
   } else {
     const half = Math.floor(maxButtons / 2); // 2
     let start = pageIndex - half;
@@ -256,7 +327,6 @@ function renderPager() {
       btn.disabled = i === pageIndex;
       btn.setAttribute('aria-label', `Página ${i + 1}`);
       btn.setAttribute('data-page', String(i));
-      btn.setAttribute('data-page', String(i));
       if (i === pageIndex) btn.classList.add('active');
       btn.addEventListener('click', () => renderPage(i));
       pager.appendChild(btn);
@@ -279,8 +349,22 @@ function renderPager() {
       last.addEventListener('click', () => renderPage(totalPages - 1));
       pager.appendChild(last);
     }
+
+    // right arrow
+    const rightArrow = createArrow('right');
+    rightArrow.disabled = pageIndex >= totalPages - 1;
+    pager.appendChild(rightArrow);
   }
   pager.style.display = totalPages > 1 ? 'flex' : 'none';
+  // Make sure the controls area is visible when there are multiple pages
+  if (extraControls) extraControls.style.display = totalPages > 1 ? 'flex' : 'none';
+  // show/hide first/prev based on pageIndex
+  if (firstBtn) firstBtn.style.display = pageIndex > 0 ? 'inline-flex' : 'none';
+  if (prevBtn) prevBtn.style.display = pageIndex > 0 ? 'inline-flex' : 'none';
+  // show/hide next button based on remaining pages
+  const remaining = Math.max(0, allPokemon.length - ((pageIndex + 1) * batchSize));
+  const nextCount = Math.min(batchSize, remaining);
+  if (loadMoreBtn) loadMoreBtn.style.display = nextCount > 0 ? 'inline-flex' : 'none';
 }
 
 function renderNextBatch() {
@@ -332,6 +416,10 @@ async function fetchAllPokemons() {
     renderPage(0);
     renderPager();
 
+    // clear any previous single search result so initial view is the paged grid
+    const singleEl = document.getElementById('pokemon-single');
+    if (singleEl) { singleEl.innerHTML = ''; singleEl.style.display = 'none'; }
+
     // show pager & controls
     extraControls.style.display = 'block';
     const remaining = Math.max(0, allPokemon.length - currentIndex);
@@ -352,6 +440,8 @@ function resetAllState() {
   loadMoreBtn.style.display = 'none';
   extraControls.style.display = 'none';
   resultEl.innerHTML = '';
+  const singleEl = document.getElementById('pokemon-single');
+  if (singleEl) { singleEl.innerHTML = ''; singleEl.style.display = 'none'; }
   setStatus('');
   totalPages = 0;
   paginationMode = 'append';
@@ -475,4 +565,10 @@ if (infiniteToggle) {
 }
 
 // Auto-load ditto on page load
-window.addEventListener('load', () => fetchPokemon(nameInput.value || 'ditto'));
+// On load, show the paged list by default (instead of loading a single 'ditto')
+window.addEventListener('load', () => {
+  // make sure the UI reflects that we're loading the full list
+  // respect the current batch size selection
+  batchSize = parseInt(batchSizeInput?.value || String(batchSize), 10) || batchSize;
+  fetchAllPokemons();
+});
