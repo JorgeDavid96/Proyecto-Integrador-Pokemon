@@ -28,7 +28,7 @@ html.dark {
     --surface: #0f1724;
     --text: #e6eef6;
     --muted: #9aa8bc;
-    --accent: #60a5fa; /* lighter blue accent */
+    --accent: #9aa8bc; /* lighter blue accent */
     --button-bg: #e6eef6;
     --button-text: #0b1220;
     /* dark mode card overrides */
